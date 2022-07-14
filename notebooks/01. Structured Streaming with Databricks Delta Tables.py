@@ -25,6 +25,18 @@
 
 # COMMAND ----------
 
+# MAGIC %sql
+# MAGIC 
+# MAGIC --
+# MAGIC -- Drop streaming tables if they exist
+# MAGIC --
+# MAGIC CREATE DATABASE IF NOT EXISTS dlt_workshop_streaming;
+# MAGIC USE dlt_workshop_streaming;
+# MAGIC 
+# MAGIC DROP TABLE IF EXISTS InventoryData;
+
+# COMMAND ----------
+
 # MAGIC %scala
 # MAGIC 
 # MAGIC /*
@@ -85,23 +97,17 @@
 
 # COMMAND ----------
 
-# MAGIC %sql
+# MAGIC %scala 
 # MAGIC 
-# MAGIC --
-# MAGIC -- Drop streaming tables if they exist
-# MAGIC --
 # MAGIC 
-# MAGIC drop table if exists InventoryData;
+# MAGIC val checkpointDir:String = "/tmp/delta-stream_dltworkshop/3"
 
 # COMMAND ----------
 
-# MAGIC %scala
-# MAGIC 
-# MAGIC /*
-# MAGIC   Setup checkpoint directory
-# MAGIC */
-# MAGIC 
-# MAGIC val checkpointDir : String = "/tmp/delta-stream_dltworkshop/3";
+# Setup checkpoint directory
+
+checkpointDir = "/tmp/delta-stream_dltworkshop/3"
+dbutils.fs.rm(checkpointDir, recurse=True)
 
 # COMMAND ----------
 
@@ -248,13 +254,13 @@
 
 # COMMAND ----------
 
-# MAGIC %python
-# MAGIC 
-# MAGIC """
-# MAGIC Specify a checkpoint directory for writing out a stream
-# MAGIC """
-# MAGIC 
-# MAGIC checkpoint_dir_1 : str = "/tmp/delta-stream_dltworkshop/silver_check_2"
+"""
+Specify a checkpoint directory for writing out a stream
+"""
+
+checkpoint_dir_1 : str = "/tmp/delta-stream_dltworkshop/silver_check_2"
+
+dbutils.fs.rm(checkpoint_dir_1, recurse=True)
 
 # COMMAND ----------
 
@@ -283,13 +289,12 @@
 
 # COMMAND ----------
 
-# MAGIC %python
-# MAGIC 
-# MAGIC """
-# MAGIC Specify a checkpoint directory for writing out a stream
-# MAGIC """
-# MAGIC 
-# MAGIC checkpoint_dir_2 : str = "/tmp/delta-stream_dltworkshop/silverupdate_check_3"
+"""
+Specify a checkpoint directory for writing out a stream
+"""
+
+checkpoint_dir_2 : str = "/tmp/delta-stream_dltworkshop/silverupdate_check_3"
+dbutils.fs.rm(checkpoint_dir_2, recurse=True)
 
 # COMMAND ----------
 
@@ -346,28 +351,25 @@
 
 # COMMAND ----------
 
-# MAGIC %python
-# MAGIC 
-# MAGIC """
-# MAGIC Specify a checkpoint directory for writing out a stream
-# MAGIC """
-# MAGIC 
-# MAGIC checkpoint_dir_3 : str = "/tmp/delta-stream_dltworkshop/gold_check_3"
+"""
+Specify a checkpoint directory for writing out a stream
+"""
+
+checkpoint_dir_3 : str = "/tmp/delta-stream_dltworkshop/gold_check_3"
+dbutils.fs.rm(checkpoint_dir_3, recurse=True)
 
 # COMMAND ----------
 
-# MAGIC %python
-# MAGIC 
-# MAGIC """
-# MAGIC Fix column names for aggregation
-# MAGIC """
-# MAGIC 
-# MAGIC new_columns = [column.replace("(","_").replace(")", "") for column in df_gold.columns]
-# MAGIC 
-# MAGIC df_gold.toDF(*new_columns)\
-# MAGIC        .writeStream\
-# MAGIC        .format("delta")\
-# MAGIC        .option("mergeSchema", "true")\
-# MAGIC        .option("checkpointLocation", checkpoint_dir_3)\
-# MAGIC        .outputMode("complete")\
-# MAGIC        .table("lending_club_stream_gold")
+"""
+Fix column names for aggregation
+"""
+
+new_columns = [column.replace("(","_").replace(")", "") for column in df_gold.columns]
+
+df_gold.toDF(*new_columns)\
+       .writeStream\
+       .format("delta")\
+       .option("mergeSchema", "true")\
+       .option("checkpointLocation", checkpoint_dir_3)\
+       .outputMode("complete")\
+       .table("lending_club_stream_gold")

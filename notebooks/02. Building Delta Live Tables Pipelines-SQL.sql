@@ -8,7 +8,7 @@ AS (
       SELECT
       *,
       input_file_name() AS inputFileName
-      FROM cloud_files( '${data_source_path}', 'csv', 
+      FROM cloud_files('${data_source_path}', 'csv', 
             map("schema","InvoiceNo STRING,StockCode STRING,Description STRING,Quantity FLOAT,InvoiceDate STRING,UnitPrice FLOAT,CustomerID STRING,Country STRING",  
             "header", "true"))
   )
@@ -29,6 +29,10 @@ TBLPROPERTIES --Can be spark, delta, or DLT confs
  AS 
  SELECT * 
  FROM STREAM(LIVE.raw_retail)
+
+-- COMMAND ----------
+
+SELECT * FROM dlt_workshop_retail.cleaned_retail;
 
 -- COMMAND ----------
 
@@ -84,7 +88,7 @@ TBLPROPERTIES
 
 -- COMMAND ----------
 
--- DBTITLE 1,Quarantine Data with Expectations
+-- DBTITLE 1,Quarantine Data with Expectations -- Preview feature automatically does this
 CREATE OR REPLACE STREAMING LIVE TABLE quarantined_retail
 (
   CONSTRAINT has_customer EXPECT (CustomerID IS NULL) ON VIOLATION DROP ROW,
@@ -163,6 +167,7 @@ TBLPROPERTIES
 "pipelines.autoOptimize.zOrderCols"="CustomerID,InvoiceNo",
 "pipelines.trigger.interval"="1 hour"
  );
+
 
 APPLY CHANGES INTO LIVE.retail_sales_all_countries
 FROM STREAM(LIVE.quality_retail)

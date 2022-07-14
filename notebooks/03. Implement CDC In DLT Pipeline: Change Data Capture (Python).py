@@ -32,7 +32,7 @@ folder = "/tmp/demo/cdc_raw"
 try:
   dbutils.fs.ls(folder)
 except:
-  print("folder doesn't exists, generating the data...")  
+  print("folder doesn't exists, generating the data...")
   fake = Faker()
   fake_firstname = F.udf(fake.first_name)
   fake_lastname = F.udf(fake.last_name)
@@ -122,7 +122,7 @@ spark.read.json(folder+"/customers").display()
 
 # MAGIC %md
 # MAGIC 
-# MAGIC ###How does CDC tools like Debezium output looks like?
+# MAGIC ###What do CDC tools like Debezium output look like?
 # MAGIC 
 # MAGIC A json message describing the changed data has interesting fields similar to the list below: 
 # MAGIC 
@@ -218,7 +218,6 @@ def customer_bronze():
 @dlt.expect_or_drop("valid_id", "id IS NOT NULL")
 @dlt.expect("valid_address", "address IS NOT NULL")
 @dlt.expect_or_drop("valid_operation", "operation IS NOT NULL")
-
 def customer_bronze_clean_v():
   return dlt.read_stream("customer_bronze") \
             .select("address", "email", "id", "firstname", "lastname", "operation", "operation_date", "_rescued_data")
